@@ -20,6 +20,19 @@ def generate_moves(possible_nb_moves):
         moves.append(random.randint(0, 1))
     return moves
 
+def execute_sequence(cells, moves):
+    position = 0
+    for move in moves:
+        if move == 0:
+            position -= 1
+            if position < 0:
+                position = len(cells) - 1
+        else:
+            position += 1
+            if position >= len(cells):
+                position = 0
+        cells[position] = 1 - cells[position]
+
 def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, possible_nb_moves, change_moves):
 
     if os.path.exists(path):
@@ -53,5 +66,11 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
                     moves = generate_moves(possible_nb_moves)
                 moves_str = "".join([str(move) for move in moves])
                 file.write(moves_str)
+
+                file.write(",")
+
+                execute_sequence(cells, moves)
+                target_str = "".join([str(cell) for cell in cells])
+                file.write(target_str)
 
                 file.write("\n")
