@@ -42,3 +42,61 @@ class SequenceInterpreter(nn.Module):
         x = rnn_outputs[:, -1, :]
         x = self.linear(x)
         return x
+
+def logits_to_bits(outputs):
+    return (outputs > 0).float()
+
+def get_nb_correct_cells_in_batch(targets, outputs):
+    outputs = logits_to_bits(outputs)
+    targets = targets.int()
+    outputs = outputs.int()
+    return (targets == outputs).sum().item()
+
+def get_nb_cells_in_dataset(dataloader):
+    nb_examples = len(dataloader) * dataloader.batch_size
+    dataset = dataloader.dataset
+    input_tensor, target_tensor = dataset[0]
+    nb_cells_per_example = target_tensor.numel()
+    return nb_examples * nb_cells_per_example
+
+def train_the_model(dataloader, model, loss_function, optimizer, device):
+    print("training")
+    model.train()
+    total_loss = 0
+    nb_correct_cells = 0
+    for i, (inputs, targets) in enumerate(dataloader):
+        inputs = inputs.to(device)
+        targets = targets.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = loss_function(outputs, targets)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+        nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
+        if (i + 1) % 10 == 0:
+            print(".", end="", flush=True)
+    average_loss = total_loss / len(dataloader)
+    accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    print()
+    return average_loss, accuracy
+
+def evaluate_the_model(dataloader, model, loss_function, device):
+    print("evaluating")
+    model.eval()
+    total_loss = 0
+    nb_correct_cells = 0
+    with torch.no_grad():
+        for i, (inputs, targets) in enumerate(dataloader):
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            outputs = model(inputs)
+            loss = loss_function(outputs, targets)
+            total_loss += loss.item()
+            nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
+            if (i + 1) % 10 == 0:
+                print(".", end="", flush=True)
+    average_loss = total_loss / len(dataloader)
+    accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    print()
+    return average_loss, accuracy

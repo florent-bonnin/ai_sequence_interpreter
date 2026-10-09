@@ -1,13 +1,18 @@
+from learning import evaluate_the_model
 from learning import SequenceInterpreter
 from learning import SequenceInterpreterDataset
+from learning import train_the_model
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 
-BATCH_SIZE = 1
+BATCH_SIZE = 64
 DATASET_PATH = "datasets/dev"
+NB_EPOCHS = 1000
 NB_RNN_LAYERS = 1
-RNN_STATE_LENGTH = 100
+RNN_STATE_LENGTH = 1000
 RNN_TYPE = "GRU"
+WEIGHT_DECAY = 0.1
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{device}\n")
@@ -16,9 +21,9 @@ train_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train.csv")
 val_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/val.csv")
 test_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/test.csv")
 
-train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+train_dataloader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
+val_dataloader = DataLoader(val_dataset, BATCH_SIZE, False, drop_last=True)
+test_dataloader = DataLoader(test_dataset, BATCH_SIZE, False, drop_last=True)
 
 input_tensor, target_tensor = train_dataset[0]
 nb_cells = target_tensor.shape[0]
@@ -26,8 +31,18 @@ sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LA
 print(f"{sequence_interpreter}")
 sequence_interpreter.to(device)
 
-input_batch, target_batch = next(iter(train_dataloader))
-print(input_batch)
-input_batch = input_batch.to(device)
-output = sequence_interpreter(input_batch)
-print(output)
+loss_function = nn.BCEWithLogitsLoss()
+optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=0.001, weight_decay=WEIGHT_DECAY)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
+
+for i in range(NB_EPOCHS):
+    print(f"epoch {i + 1}")
+    print(f"learning rate = {optimizer.param_groups[0]["lr"]}")
+    training_loss, training_accuracy = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
+    validation_loss, validation_accuracy = evaluate_the_model(val_dataloader, sequence_interpreter, loss_function, device)
+    scheduler.step(validation_loss)
+    print(f"training loss = {training_loss}")
+    print(f"validation loss = {validation_loss}")
+    print(f"training accuracy = {training_accuracy}")
+    print(f"validation accuracy = {validation_accuracy}")
+    print()
