@@ -2,13 +2,14 @@ from dataset_generation import generate_dataset
 
 path = "datasets/dev"
 parts = (
-    ("train", 80000),
-    ("val", 10000),
-    ("test", 10000)
+    ("train", 800),
+    ("val", 100),
+    ("test", 100)
 )
 nb_cells = 100
 initialization_type = "zero"
-write_initialization = True
-possible_nbs_moves = [100]
-change_moves = True
-generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, possible_nbs_moves, change_moves)
+write_initialization = False
+moves_type = "curriculum"
+nbs_moves = [10, 100]
+
+generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves)

@@ -36,24 +36,15 @@ def execute_sequence(cells, moves):
 def generate_curriculum_steps(moves_type, nbs_moves):
     curriculum_steps = []
     if moves_type == "constant":
-        curriculum_step = {
-            "moves": generate_moves(nbs_moves),
-            "nbs_moves": None
-        }
+        curriculum_step = None
         curriculum_steps.append(curriculum_step)
     elif moves_type == "variable":
-        curriculum_step = {
-            "moves": None,
-            "nbs_moves": nbs_moves
-        }
+        curriculum_step = nbs_moves
         curriculum_steps.append(curriculum_step)
     elif moves_type == "curriculum":
         nbs_moves = sorted(set(nbs_moves))
         for nb_moves in nbs_moves:
-            curriculum_step = {
-                "moves": None,
-                "nbs_moves": list(range(nb_moves + 1))
-            }
+            curriculum_step = list(range(nb_moves + 1))
             curriculum_steps.append(curriculum_step)
     return curriculum_steps
 
@@ -69,31 +60,38 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
         else:
             random_initialization = True
         initial_cells = create_cells(nb_cells, random_initialization)
+
+    if moves_type == "constant":
+        moves = generate_moves(nbs_moves)
+    curriculum_steps = generate_curriculum_steps(moves_type, nbs_moves)
+    print("curriculum_steps :")
+    print(curriculum_steps)
     
     for part_name, part_size in parts:
         part_path = f"{path}/{part_name}"
         Path(part_path).mkdir()
-        # TODO : à retravailler
-        with open(file_name, "w", encoding="utf-8") as file:
-            for i in range(part_size):
+        for i, curriculum_step in enumerate(curriculum_steps):
+            file_name = f"{part_path}/{i + 1}.csv"
+            with open(file_name, "w", encoding="utf-8") as file:
+                for i in range(part_size):
 
-                if initialization_type in [0, 1]:
-                    cells = initial_cells.copy()
-                elif initialization_type == 2:
-                    cells = create_cells(nb_cells, True)
-                if write_initialization:
-                    initialization_str = "".join([str(cell) for cell in cells])
-                    file.write(initialization_str)
+                    if initialization_type in ["zero", "constant"]:
+                        cells = initial_cells.copy()
+                    elif initialization_type == "variable":
+                        cells = create_cells(nb_cells, True)
+                    if write_initialization:
+                        initialization_str = "".join([str(cell) for cell in cells])
+                        file.write(initialization_str)
 
-                if change_moves:
-                    moves = generate_moves(possible_nbs_moves)
-                moves_str = "".join([str(move) for move in moves])
-                file.write(moves_str)
+                    if moves_type in ["variable", "curriculum"]:
+                        moves = generate_moves(curriculum_step)
+                    moves_str = "".join([str(move) for move in moves])
+                    file.write(moves_str)
 
-                file.write(",")
+                    file.write(",")
 
-                execute_sequence(cells, moves)
-                target_str = "".join([str(cell) for cell in cells])
-                file.write(target_str)
+                    execute_sequence(cells, moves)
+                    target_str = "".join([str(cell) for cell in cells])
+                    file.write(target_str)
 
-                file.write("\n")
+                    file.write("\n")
