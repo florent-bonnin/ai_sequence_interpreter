@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
 class SequenceInterpreterDataset(Dataset):
@@ -26,6 +27,12 @@ class SequenceInterpreterDataset(Dataset):
     def __getitem__(self, index):
         return self.examples[index]
 
+def collate_fn(batch):
+    inputs, targets = zip(*batch)
+    inputs = pad_sequence(inputs, batch_first=True, padding_value=-1)
+    targets = torch.stack(targets)
+    return inputs, targets
+
 class SequenceInterpreter(nn.Module):
 
     def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, nb_cells):
@@ -38,6 +45,8 @@ class SequenceInterpreter(nn.Module):
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):
+        lengths = (x != -1).sum(dim=1).cpu()
+        x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
         x = rnn_outputs[:, -1, :]
         x = self.linear(x)
