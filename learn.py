@@ -12,7 +12,7 @@ BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 NB_EPOCHS = 1000
-NB_RNN_LAYERS = 2
+NB_RNN_LAYERS = 1
 RNN_STATE_LENGTH = 1000
 RNN_TYPE = "GRU"
 WEIGHT_DECAY = 0.1
@@ -52,13 +52,15 @@ for i in range(nb_curriculum_steps):
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")
         print(f"learning rate = {optimizer.param_groups[0]["lr"]}")
-        training_loss, training_accuracy = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
-        validation_loss, validation_accuracy = evaluate_the_model(val_dataloader, sequence_interpreter, loss_function, device)
+        training_loss, training_cell_wise_accuracy, training_sequence_wise_accuracy = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
+        validation_loss, validation_cell_wise_accuracy, validation_sequence_wise_accuracy = evaluate_the_model(val_dataloader, sequence_interpreter, loss_function, device)
         scheduler.step(validation_loss)
         print(f"training loss = {training_loss}")
         print(f"validation loss = {validation_loss}")
-        print(f"training accuracy = {training_accuracy}")
-        print(f"validation accuracy = {validation_accuracy}")
+        print(f"training cell-wise accuracy = {training_cell_wise_accuracy}")
+        print(f"validation cell-wise accuracy = {validation_cell_wise_accuracy}")
+        print(f"training sequence-wise accuracy = {training_sequence_wise_accuracy}")
+        print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
         print()
-        if validation_accuracy == 1 and training_accuracy == 1:
+        if validation_sequence_wise_accuracy == 1 and training_sequence_wise_accuracy == 1:
             break

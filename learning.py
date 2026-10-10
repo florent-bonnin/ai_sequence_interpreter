@@ -62,8 +62,6 @@ def logits_to_bits(outputs):
 
 def get_nb_correct_cells_in_batch(targets, outputs):
     outputs = logits_to_bits(outputs)
-    targets = targets.int()
-    outputs = outputs.int()
     return (targets == outputs).sum().item()
 
 def get_nb_cells_in_dataset(dataloader):
@@ -73,11 +71,19 @@ def get_nb_cells_in_dataset(dataloader):
     nb_cells_per_example = target_tensor.numel()
     return nb_examples * nb_cells_per_example
 
+def get_nb_correct_sequences_in_batch(targets, outputs):
+    outputs = logits_to_bits(outputs)
+    return (targets == outputs).all(dim=1).sum().item()
+
+def get_nb_sequences_in_dataset(dataloader):
+    return len(dataloader) * dataloader.batch_size
+
 def train_the_model(dataloader, model, loss_function, optimizer, device):
     print("training")
     model.train()
     total_loss = 0
     nb_correct_cells = 0
+    nb_correct_sequences = 0
     for i, (inputs, targets) in enumerate(dataloader):
         inputs = inputs.to(device)
         targets = targets.to(device)
@@ -88,18 +94,21 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
         optimizer.step()
         total_loss += loss.item()
         nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
+        nb_correct_sequences += get_nb_correct_sequences_in_batch(targets, outputs)
         if (i + 1) % 10 == 0:
             print(".", end="", flush=True)
     average_loss = total_loss / len(dataloader)
-    accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    cell_wise_accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    sequence_wise_accuracy = nb_correct_sequences / get_nb_sequences_in_dataset(dataloader)
     print()
-    return average_loss, accuracy
+    return average_loss, cell_wise_accuracy, sequence_wise_accuracy
 
 def evaluate_the_model(dataloader, model, loss_function, device):
     print("evaluating")
     model.eval()
     total_loss = 0
     nb_correct_cells = 0
+    nb_correct_sequences = 0
     with torch.no_grad():
         for i, (inputs, targets) in enumerate(dataloader):
             inputs = inputs.to(device)
@@ -108,9 +117,11 @@ def evaluate_the_model(dataloader, model, loss_function, device):
             loss = loss_function(outputs, targets)
             total_loss += loss.item()
             nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
+            nb_correct_sequences += get_nb_correct_sequences_in_batch(targets, outputs)
             if (i + 1) % 10 == 0:
                 print(".", end="", flush=True)
     average_loss = total_loss / len(dataloader)
-    accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    cell_wise_accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
+    sequence_wise_accuracy = nb_correct_sequences / get_nb_sequences_in_dataset(dataloader)
     print()
-    return average_loss, accuracy
+    return average_loss, cell_wise_accuracy, sequence_wise_accuracy
