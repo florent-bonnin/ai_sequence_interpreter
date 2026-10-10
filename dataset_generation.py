@@ -64,14 +64,14 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
     if moves_type == "constant":
         moves = generate_moves(nbs_moves)
     curriculum_steps = generate_curriculum_steps(moves_type, nbs_moves)
-    print("curriculum_steps :")
-    print(curriculum_steps)
     
     for part_name, part_size in parts:
+
         part_path = f"{path}/{part_name}"
         Path(part_path).mkdir()
+
         for i, curriculum_step in enumerate(curriculum_steps):
-            file_name = f"{part_path}/{i + 1}.csv"
+            file_name = f"{part_path}/{i + 1:0{len(str(len(curriculum_steps)))}d}.csv"
             with open(file_name, "w", encoding="utf-8") as file:
                 for i in range(part_size):
 
