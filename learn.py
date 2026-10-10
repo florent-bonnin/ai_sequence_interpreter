@@ -2,6 +2,7 @@ from learning import evaluate_the_model
 from learning import SequenceInterpreter
 from learning import SequenceInterpreterDataset
 from learning import train_the_model
+from pathlib import Path
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -17,6 +18,25 @@ WEIGHT_DECAY = 0.1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{device}\n")
 
+# GETTING INFO
+train_path = f"{DATASET_PATH}/train"
+train_files = sorted([str(path) for path in Path(train_path).iterdir()])
+nb_curriculum_steps = len(train_files)
+print(f"nb_curriculum_steps = {nb_curriculum_steps}")
+
+# MODEL CREATION
+dataset = SequenceInterpreterDataset(train_files[0])
+input_tensor, target_tensor = dataset[0]
+nb_cells = target_tensor.shape[0]
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, nb_cells)
+print(f"{sequence_interpreter}")
+sequence_interpreter.to(device)
+
+for i in range(nb_curriculum_steps):
+    pass
+
+exit()
+
 train_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train.csv")
 val_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/val.csv")
 test_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/test.csv")
@@ -24,12 +44,6 @@ test_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/test.csv")
 train_dataloader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 val_dataloader = DataLoader(val_dataset, BATCH_SIZE, False, drop_last=True)
 test_dataloader = DataLoader(test_dataset, BATCH_SIZE, False, drop_last=True)
-
-input_tensor, target_tensor = train_dataset[0]
-nb_cells = target_tensor.shape[0]
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, nb_cells)
-print(f"{sequence_interpreter}")
-sequence_interpreter.to(device)
 
 loss_function = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=0.001, weight_decay=WEIGHT_DECAY)
