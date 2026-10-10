@@ -9,21 +9,17 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 BATCH_SIZE = 64
+BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 NB_EPOCHS = 1000
-NB_RNN_LAYERS = 1
+NB_RNN_LAYERS = 2
 RNN_STATE_LENGTH = 1000
 RNN_TYPE = "GRU"
 WEIGHT_DECAY = 0.1
 
-# TORM
-dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/01.csv")
-dataloader = DataLoader(dataset, 4, collate_fn=collate_fn)
-batch = next(iter(dataloader))
-print(batch)
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"{device}\n")
+print(f"{device}")
+print()
 
 # GETTING INFO
 train_path = f"{DATASET_PATH}/train"
@@ -34,8 +30,9 @@ input_tensor, target_tensor = dataset[0]
 nb_cells = target_tensor.shape[0]
 
 # MODEL CREATION
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, nb_cells)
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, nb_cells)
 print(f"{sequence_interpreter}")
+print()
 sequence_interpreter.to(device)
 
 loss_function = nn.BCEWithLogitsLoss()

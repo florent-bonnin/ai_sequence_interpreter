@@ -36,14 +36,14 @@ def collate_fn(batch):
 
 class SequenceInterpreter(nn.Module):
 
-    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, nb_cells):
+    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells):
         super().__init__()
         self.rnn_type = rnn_type
         if rnn_type == "GRU":
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
             rnn_class = nn.LSTM
-        self.rnn = rnn_class(1, rnn_state_length, nb_rnn_layers, batch_first=True)
+        self.rnn = rnn_class(1, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):

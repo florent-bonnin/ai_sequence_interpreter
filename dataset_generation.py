@@ -49,6 +49,10 @@ def generate_curriculum_steps(moves_type, nbs_moves):
     return curriculum_steps
 
 def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves):
+    """
+    initialization_type must be "zero", "constant" or "variable"
+    moves_type must be "constant", "variable" or "curriculum"
+    """
 
     if os.path.exists(path):
         shutil.rmtree(path)
