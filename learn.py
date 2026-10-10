@@ -17,12 +17,10 @@ RNN_TYPE = "GRU"
 WEIGHT_DECAY = 0.1
 
 # TORM
-dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/010.csv")
+dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/01.csv")
 dataloader = DataLoader(dataset, 4, collate_fn=collate_fn)
 batch = next(iter(dataloader))
 print(batch)
-
-exit()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{device}\n")
@@ -47,10 +45,9 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, pa
 # CURRICULUM
 for i in range(nb_curriculum_steps):
 
-    print(f"curriculum step {i + 1}")
-
-    train_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/{i + 1}.csv")
-    val_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/val/{i + 1}.csv")
+    nb_digits = len(str(nb_curriculum_steps))
+    train_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/{i + 1:0{nb_digits}d}.csv")
+    val_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/val/{i + 1:0{nb_digits}d}.csv")
 
     train_dataloader = DataLoader(train_dataset, BATCH_SIZE, True, collate_fn=collate_fn, drop_last=True)
     val_dataloader = DataLoader(val_dataset, BATCH_SIZE, False, collate_fn=collate_fn, drop_last=True)
@@ -66,5 +63,5 @@ for i in range(nb_curriculum_steps):
         print(f"training accuracy = {training_accuracy}")
         print(f"validation accuracy = {validation_accuracy}")
         print()
-        if validation_loss == 1:
+        if validation_accuracy == 1 and training_accuracy == 1:
             break

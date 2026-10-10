@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
@@ -37,6 +38,7 @@ class SequenceInterpreter(nn.Module):
 
     def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, nb_cells):
         super().__init__()
+        self.rnn_type = rnn_type
         if rnn_type == "GRU":
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
@@ -45,10 +47,13 @@ class SequenceInterpreter(nn.Module):
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):
-        lengths = (x != -1).sum(dim=1).cpu()
+        lengths = (x.squeeze(2) != -1).sum(dim=1).cpu()
         x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
-        x = rnn_outputs[:, -1, :]
+        if self.rnn_type == "GRU":
+            x = state[-1]
+        elif self.rnn_type == "LSTM":
+            x = state[0][-1]
         x = self.linear(x)
         return x
 
