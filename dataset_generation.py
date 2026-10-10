@@ -13,8 +13,8 @@ def create_cells(nb_cells, random_initialization):
         cells.append(cell)
     return cells
 
-def generate_moves(possible_nb_moves):
-    nb_moves = possible_nb_moves[random.randint(0, len(possible_nb_moves) - 1)]
+def generate_moves(nbs_moves):
+    nb_moves = nbs_moves[random.randint(0, len(nbs_moves) - 1)]
     moves = []
     for i in range(nb_moves):
         moves.append(random.randint(0, 1))
@@ -33,24 +33,47 @@ def execute_sequence(cells, moves):
                 position = 0
         cells[position] = 1 - cells[position]
 
-def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, possible_nb_moves, change_moves):
+def generate_curriculum_steps(moves_type, nbs_moves):
+    curriculum_steps = []
+    if moves_type == "constant":
+        curriculum_step = {
+            "moves": generate_moves(nbs_moves),
+            "nbs_moves": None
+        }
+        curriculum_steps.append(curriculum_step)
+    elif moves_type == "variable":
+        curriculum_step = {
+            "moves": None,
+            "nbs_moves": nbs_moves
+        }
+        curriculum_steps.append(curriculum_step)
+    elif moves_type == "curriculum":
+        nbs_moves = sorted(set(nbs_moves))
+        for nb_moves in nbs_moves:
+            curriculum_step = {
+                "moves": None,
+                "nbs_moves": list(range(nb_moves + 1))
+            }
+            curriculum_steps.append(curriculum_step)
+    return curriculum_steps
+
+def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves):
 
     if os.path.exists(path):
         shutil.rmtree(path)
     Path(path).mkdir(parents=True)
 
-    if initialization_type in [0, 1]:
-        if initialization_type == 0:
+    if initialization_type in ["zero", "constant"]:
+        if initialization_type == "zero":
             random_initialization = False
         else:
             random_initialization = True
         initial_cells = create_cells(nb_cells, random_initialization)
     
-    if not change_moves:
-        moves = generate_moves(possible_nb_moves)
-
     for part_name, part_size in parts:
-        file_name = f"{path}/{part_name}.csv"
+        part_path = f"{path}/{part_name}"
+        Path(part_path).mkdir()
+        # TODO : à retravailler
         with open(file_name, "w", encoding="utf-8") as file:
             for i in range(part_size):
 
@@ -63,7 +86,7 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
                     file.write(initialization_str)
 
                 if change_moves:
-                    moves = generate_moves(possible_nb_moves)
+                    moves = generate_moves(possible_nbs_moves)
                 moves_str = "".join([str(move) for move in moves])
                 file.write(moves_str)
 
