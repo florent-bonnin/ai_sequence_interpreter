@@ -37,7 +37,6 @@ sequence_interpreter.to(device)
 
 loss_function = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=0.001, weight_decay=WEIGHT_DECAY)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
 
 # CURRICULUM
 for i in range(nb_curriculum_steps):
@@ -48,6 +47,8 @@ for i in range(nb_curriculum_steps):
 
     train_dataloader = DataLoader(train_dataset, BATCH_SIZE, True, collate_fn=collate_fn, drop_last=True)
     val_dataloader = DataLoader(val_dataset, BATCH_SIZE, False, collate_fn=collate_fn, drop_last=True)
+
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
 
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")

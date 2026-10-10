@@ -16,9 +16,9 @@ class SequenceInterpreterDataset(Dataset):
                 target_str = fields[1]
                 input_list = [int(char) for char in input_str]
                 target_list = [int(char) for char in target_str]
-                input_tensor = torch.tensor(input_list).float() / 3
+                input_tensor = torch.tensor(input_list).float()
                 target_tensor = torch.tensor(target_list).float()
-                input_tensor = input_tensor.unsqueeze(1)
+                input_tensor = input_tensor.unsqueeze(1) / 3
                 example = (input_tensor, target_tensor)
                 self.examples.append(example)
 

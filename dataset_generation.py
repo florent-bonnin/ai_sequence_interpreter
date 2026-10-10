@@ -75,6 +75,7 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
         Path(part_path).mkdir()
 
         for i, curriculum_step in enumerate(curriculum_steps):
+            print(f"generating curriculum step {i + 1}")
             file_name = f"{part_path}/{i + 1:0{len(str(len(curriculum_steps)))}d}.csv"
             with open(file_name, "w", encoding="utf-8") as file:
                 for i in range(part_size):

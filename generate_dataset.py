@@ -9,7 +9,7 @@ parts = (
 nb_cells = 100
 initialization_type = "zero"
 write_initialization = True
-moves_type = "variable"
-nbs_moves = list(range(5))
+moves_type = "curriculum"
+nbs_moves = list(range(100 + 1))
 
 generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves)
