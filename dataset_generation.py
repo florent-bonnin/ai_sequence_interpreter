@@ -17,13 +17,13 @@ def generate_moves(nbs_moves):
     nb_moves = nbs_moves[random.randint(0, len(nbs_moves) - 1)]
     moves = []
     for i in range(nb_moves):
-        moves.append(random.randint(0, 1))
+        moves.append(random.randint(2, 3))
     return moves
 
 def execute_sequence(cells, moves):
     position = 0
     for move in moves:
-        if move == 0:
+        if move == 2:
             position -= 1
             if position < 0:
                 position = len(cells) - 1

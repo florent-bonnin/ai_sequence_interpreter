@@ -7,10 +7,9 @@ parts = (
     ("test", 10000)
 )
 nb_cells = 100
-initialization_type = "variable"
+initialization_type = "zero"
 write_initialization = True
 moves_type = "variable"
-#nbs_moves = list(range(10))
-nbs_moves = [1]
+nbs_moves = list(range(5))
 
 generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves)
