@@ -1,2 +1,0 @@
-- MASKING
-- sequence-wise instead of bit-wise accuracy ?
