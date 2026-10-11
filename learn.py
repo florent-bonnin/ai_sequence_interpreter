@@ -14,7 +14,7 @@ DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.001
 NB_EPOCHS = 1000
 NB_RNN_LAYERS = 1
-RESET_OPTIMIZER = True
+RESET_LEARNING_RATE = False
 RESET_SCHEDULER = True
 RNN_STATE_LENGTH = 1000
 RNN_TYPE = "GRU"
@@ -74,7 +74,7 @@ for i in range(nb_curriculum_steps):
 
     if RESET_SCHEDULER:
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
-    if RESET_OPTIMIZER:
+    if RESET_LEARNING_RATE:
         optimizer.param_groups[0]["lr"] = INITIAL_LEARNING_RATE
 
     success = False
