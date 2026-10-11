@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-BATCH_SIZE = 3
+BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.001
@@ -25,21 +25,22 @@ print(f"{device}")
 print()
 
 # TMP
-file = f"{DATASET_PATH}/train/1.csv"
-dataset = SequenceInterpreterDataset(file)
-for i in range(10):
-    example = dataset[i]
-    #print(example)
-dataloader = DataLoader(dataset, BATCH_SIZE, collate_fn=collate_fn)
-batch = next(iter(dataloader))
-print("BATCH:")
-print(batch)
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, 10, True)
-input_tensor, target_tensor = batch
-output = sequence_interpreter(input_tensor)
-print("OUTPUT:")
-print(output)
-exit()
+#file = f"{DATASET_PATH}/train/1.csv"
+#dataset = SequenceInterpreterDataset(file)
+#for i in range(10):
+#    example = dataset[i]
+#    #print(example)
+#dataloader = DataLoader(dataset, BATCH_SIZE, collate_fn=collate_fn)
+#batch = next(iter(dataloader))
+#print("BATCH:")
+#print(batch)
+#sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, 10, True)
+#input_tensor, target_tensor = batch
+#output = sequence_interpreter(input_tensor)
+#print("OUTPUT:")
+#print(output)
+#print(f"output shape = {output.shape}")
+#exit()
 
 # GETTING INFO
 train_path = f"{DATASET_PATH}/train"
@@ -47,10 +48,12 @@ train_files = sorted([str(path) for path in Path(train_path).iterdir()])
 nb_curriculum_steps = len(train_files)
 dataset = SequenceInterpreterDataset(train_files[0])
 input_tensor, target_tensor = dataset[0]
-nb_cells = target_tensor.shape[0]
+nb_cells = target_tensor.shape[1]
+with open(train_files[0], "r", encoding="utf-8") as file:
+    include_intermediate_steps = ":" in file.read()
 
 # MODEL CREATION
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, nb_cells)
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, nb_cells, include_intermediate_steps)
 print(f"{sequence_interpreter}")
 print()
 sequence_interpreter.to(device)
@@ -93,5 +96,5 @@ for i in range(nb_curriculum_steps):
             success = True
             break
 
-    if not sucess:
+    if not success:
         break

@@ -74,15 +74,16 @@ def get_nb_correct_cells_in_batch(targets, outputs):
     return (targets == outputs).sum().item()
 
 def get_nb_cells_in_dataset(dataloader):
-    nb_examples = len(dataloader) * dataloader.batch_size
-    dataset = dataloader.dataset
-    input_tensor, target_tensor = dataset[0]
-    nb_cells_per_example = target_tensor.numel()
-    return nb_examples * nb_cells_per_example
+    nb_cells_in_dataset = 0
+    for inputs, targets in dataloader:
+        nb_cells_in_batch = (targets != -1).sum().item()
+        nb_cells_in_dataset += nb_cells_in_batch
+    return nb_cells_in_dataset
 
 def get_nb_correct_sequences_in_batch(targets, outputs):
     outputs = logits_to_bits(outputs)
-    return (targets == outputs).all(dim=1).sum().item()
+    outputs[targets == -1] = -1
+    return (targets == outputs).all(dim=(1, 2)).sum().item()
 
 def get_nb_sequences_in_dataset(dataloader):
     return len(dataloader) * dataloader.batch_size
@@ -98,7 +99,8 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
         targets = targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
-        loss = loss_function(outputs, targets)
+        mask = targets != -1
+        loss = loss_function(outputs[mask], targets[mask])
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
@@ -123,7 +125,8 @@ def evaluate_the_model(dataloader, model, loss_function, device):
             inputs = inputs.to(device)
             targets = targets.to(device)
             outputs = model(inputs)
-            loss = loss_function(outputs, targets)
+            mask = targets != -1
+            loss = loss_function(outputs[mask], targets[mask])
             total_loss += loss.item()
             nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
             nb_correct_sequences += get_nb_correct_sequences_in_batch(targets, outputs)
