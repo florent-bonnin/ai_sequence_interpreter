@@ -20,9 +20,14 @@ def generate_moves(nbs_moves):
         moves.append(random.randint(2, 3))
     return moves
 
-def execute_sequence(cells, moves):
+def execute_sequence(cells, moves, include_intermediate_steps):
     position = 0
+    intermediate_steps = []
     for move in moves:
+        if include_intermediate_steps:
+            intermediate_step = [str(cell) for cell in cells]
+            intermediate_step = "".join(intermediate_step)
+            intermediate_steps.append(intermediate_step)
         if move == 2:
             position -= 1
             if position < 0:
@@ -32,6 +37,7 @@ def execute_sequence(cells, moves):
             if position >= len(cells):
                 position = 0
         cells[position] = 1 - cells[position]
+    return intermediate_steps
 
 def generate_curriculum_steps(moves_type, nbs_moves):
     curriculum_steps = []
@@ -48,7 +54,7 @@ def generate_curriculum_steps(moves_type, nbs_moves):
             curriculum_steps.append(curriculum_step)
     return curriculum_steps
 
-def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves):
+def generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves, include_intermediate_steps):
     """
     initialization_type must be "zero", "constant" or "variable"
     moves_type must be "constant", "variable" or "curriculum"
@@ -95,8 +101,10 @@ def generate_dataset(path, parts, nb_cells, initialization_type, write_initializ
 
                     file.write(",")
 
-                    execute_sequence(cells, moves)
+                    intermediate_steps = execute_sequence(cells, moves, include_intermediate_steps)
                     target_str = "".join([str(cell) for cell in cells])
-                    file.write(target_str)
+                    intermediate_steps.append(target_str)
+                    intermediate_steps = ":".join(intermediate_steps)
+                    file.write(intermediate_steps)
 
                     file.write("\n")

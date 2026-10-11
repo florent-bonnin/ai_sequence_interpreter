@@ -12,7 +12,7 @@ BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.001
-NB_EPOCHS = 1000
+NB_EPOCHS = 300
 NB_RNN_LAYERS = 1
 RESET_OPTIMIZER = True
 RESET_SCHEDULER = True
@@ -57,6 +57,8 @@ for i in range(nb_curriculum_steps):
     if RESET_OPTIMIZER:
         optimizer.param_groups[0]["lr"] = INITIAL_LEARNING_RATE
 
+    success = False
+
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")
         print(f"learning rate = {optimizer.param_groups[0]["lr"]}")
@@ -71,4 +73,8 @@ for i in range(nb_curriculum_steps):
         print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
         print()
         if validation_sequence_wise_accuracy == 1 and training_sequence_wise_accuracy == 1:
+            success = True
             break
+
+    if not sucess:
+        break
