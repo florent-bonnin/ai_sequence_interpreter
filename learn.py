@@ -11,8 +11,11 @@ from torch.utils.data import DataLoader
 BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
+INITIAL_LEARNING_RATE = 0.001
 NB_EPOCHS = 1000
 NB_RNN_LAYERS = 1
+RESET_OPTIMIZER = True
+RESET_SCHEDULER = True
 RNN_STATE_LENGTH = 1000
 RNN_TYPE = "GRU"
 WEIGHT_DECAY = 0.1
@@ -36,7 +39,8 @@ print()
 sequence_interpreter.to(device)
 
 loss_function = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=0.001, weight_decay=WEIGHT_DECAY)
+optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=INITIAL_LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
 
 # CURRICULUM
 for i in range(nb_curriculum_steps):
@@ -48,7 +52,10 @@ for i in range(nb_curriculum_steps):
     train_dataloader = DataLoader(train_dataset, BATCH_SIZE, True, collate_fn=collate_fn, drop_last=True)
     val_dataloader = DataLoader(val_dataset, BATCH_SIZE, False, collate_fn=collate_fn, drop_last=True)
 
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
+    if RESET_SCHEDULER:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
+    if RESET_OPTIMIZER:
+        optimizer.param_groups[0]["lr"] = INITIAL_LEARNING_RATE
 
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")
