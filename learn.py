@@ -8,6 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
+ACCURACY_TARGET = 0.98
 BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
@@ -23,24 +24,6 @@ WEIGHT_DECAY = 0.1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{device}")
 print()
-
-# TMP
-#file = f"{DATASET_PATH}/train/1.csv"
-#dataset = SequenceInterpreterDataset(file)
-#for i in range(10):
-#    example = dataset[i]
-#    #print(example)
-#dataloader = DataLoader(dataset, BATCH_SIZE, collate_fn=collate_fn)
-#batch = next(iter(dataloader))
-#print("BATCH:")
-#print(batch)
-#sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, 10, True)
-#input_tensor, target_tensor = batch
-#output = sequence_interpreter(input_tensor)
-#print("OUTPUT:")
-#print(output)
-#print(f"output shape = {output.shape}")
-#exit()
 
 # GETTING INFO
 train_path = f"{DATASET_PATH}/train"
@@ -100,7 +83,7 @@ for i in range(nb_curriculum_steps):
         print(f"best epoch = {best_epoch}")
         print(f"best validation sequence-wise accuracy = {best_validation_sequence_wise_accuracy}")
         print()
-        if validation_sequence_wise_accuracy >= 0.99:
+        if validation_sequence_wise_accuracy >= ACCURACY_TARGET:
             success = True
             break
 
