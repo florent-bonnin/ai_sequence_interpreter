@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-BATCH_SIZE = 64
+BATCH_SIZE = 3
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.001
@@ -23,6 +23,23 @@ WEIGHT_DECAY = 0.1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{device}")
 print()
+
+# TMP
+file = f"{DATASET_PATH}/train/1.csv"
+dataset = SequenceInterpreterDataset(file)
+for i in range(10):
+    example = dataset[i]
+    #print(example)
+dataloader = DataLoader(dataset, BATCH_SIZE, collate_fn=collate_fn)
+batch = next(iter(dataloader))
+print("BATCH:")
+print(batch)
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, 10, True)
+input_tensor, target_tensor = batch
+output = sequence_interpreter(input_tensor)
+print("OUTPUT:")
+print(output)
+exit()
 
 # GETTING INFO
 train_path = f"{DATASET_PATH}/train"

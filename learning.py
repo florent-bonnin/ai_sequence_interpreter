@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pad_packed_sequence
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
@@ -14,8 +15,9 @@ class SequenceInterpreterDataset(Dataset):
                 fields = line.split(",")
                 input_str = fields[0]
                 target_str = fields[1]
+                intermediate_steps = target_str.split(":")
                 input_list = [int(char) for char in input_str]
-                target_list = [int(char) for char in target_str]
+                target_list = [[int(char) for char in intermediate_step] for intermediate_step in intermediate_steps]
                 input_tensor = torch.tensor(input_list).float()
                 target_tensor = torch.tensor(target_list).float()
                 input_tensor = input_tensor.unsqueeze(1) / 3
@@ -31,14 +33,16 @@ class SequenceInterpreterDataset(Dataset):
 def collate_fn(batch):
     inputs, targets = zip(*batch)
     inputs = pad_sequence(inputs, batch_first=True, padding_value=-1)
-    targets = torch.stack(targets)
+    targets = pad_sequence(targets, batch_first=True, padding_value=-1)
     return inputs, targets
 
 class SequenceInterpreter(nn.Module):
 
-    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells):
+    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells, include_intermediate_steps):
         super().__init__()
         self.rnn_type = rnn_type
+        self.nb_cells = nb_cells
+        self.include_intermediate_steps = include_intermediate_steps
         if rnn_type == "GRU":
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
@@ -50,10 +54,15 @@ class SequenceInterpreter(nn.Module):
         lengths = (x.squeeze(2) != -1).sum(dim=1).cpu()
         x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
-        if self.rnn_type == "GRU":
-            x = state[-1]
-        elif self.rnn_type == "LSTM":
-            x = state[0][-1]
+        if self.include_intermediate_steps:
+            padded_rnn_outputs, lengths = pad_packed_sequence(rnn_outputs, True, -1)
+            x = padded_rnn_outputs[:, self.nb_cells - 1:, :]
+        else:
+            if self.rnn_type == "GRU":
+                x = state[-1]
+            elif self.rnn_type == "LSTM":
+                x = state[0][-1]
+            x = x.unsqueeze(1)
         x = self.linear(x)
         return x
 
