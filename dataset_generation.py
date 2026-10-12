@@ -23,12 +23,13 @@ def generate_instructions(nbs_instructions, instructions_subset):
 
 def keep_in_space(nb_cells, position):
     if position == -1:
-        position = len(cells) - 1
-    elif position == len(cells):
+        position = nb_cells - 1
+    elif position == nb_cells:
         position = 0
     return position
 
 def execute_instructions(cells, instructions, include_intermediate_steps):
+    nb_cells = len(cells)
     position = 0
     intermediate_steps = []
     for instruction in instructions:
