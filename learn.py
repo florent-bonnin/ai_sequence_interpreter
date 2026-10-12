@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-ACCURACY_TARGET = 0.98
+ACCURACY_TARGET = 0.99
 BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
@@ -34,17 +34,14 @@ NB_CELLS = target_tensor.shape[1]
 NB_CURRICULUM_STEPS = len(validation_files)
 with open(validation_files[0], "r", encoding="utf-8") as file:
     text = file.read()
-    symbols = set(text) - {",", ":", "\n"}
-    NB_SYMBOLS = len(symbols)
     INCLUDE_INTERMEDIATE_STEPS = ":" in text
 print(f"NB_CELLS = {NB_CELLS}")
 print(f"NB_CURRICULUM_STEPS = {NB_CURRICULUM_STEPS}")
-print(f"NB_SYMBOLS = {NB_SYMBOLS}")
 print(f"INCLUDE_INTERMEDIATE_STEPS = {INCLUDE_INTERMEDIATE_STEPS}")
 print()
 
 # MODEL CREATION
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, NB_CELLS, INCLUDE_INTERMEDIATE_STEPS, NB_SYMBOLS)
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, NB_CELLS, INCLUDE_INTERMEDIATE_STEPS)
 print(f"{sequence_interpreter}")
 print()
 sequence_interpreter.to(device)

@@ -38,22 +38,21 @@ def collate_fn(batch):
 
 class SequenceInterpreter(nn.Module):
 
-    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells, include_intermediate_steps, nb_symbols):
+    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells, include_intermediate_steps):
         super().__init__()
         self.rnn_type = rnn_type
         self.nb_cells = nb_cells
         self.include_intermediate_steps = include_intermediate_steps
-        self.nb_symbols = nb_symbols
         if rnn_type == "GRU":
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
             rnn_class = nn.LSTM
-        self.rnn = rnn_class(nb_symbols, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
+        self.rnn = rnn_class(10, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):
         lengths = (x != -1).sum(dim=1).cpu()
-        x = nn.functional.one_hot(x.clamp(0), self.nb_symbols)
+        x = nn.functional.one_hot(x.clamp(0), 10)
         x = x.float()
         x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
