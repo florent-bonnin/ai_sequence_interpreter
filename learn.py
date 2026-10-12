@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-ACCURACY_TARGET = 0.99
+ACCURACY_TARGET = 0.98
 BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
@@ -80,14 +80,12 @@ for i in range(NB_CURRICULUM_STEPS):
         if validation_sequence_wise_accuracy > best_validation_sequence_wise_accuracy:
             best_epoch = j + 1
             best_validation_sequence_wise_accuracy = validation_sequence_wise_accuracy
-        print(f"training loss = {training_loss}")
-        print(f"validation loss = {validation_loss}")
-        print(f"training cell-wise accuracy = {training_cell_wise_accuracy}")
-        print(f"validation cell-wise accuracy = {validation_cell_wise_accuracy}")
-        print(f"training sequence-wise accuracy = {training_sequence_wise_accuracy}")
-        print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
         print(f"maximum gradient norm = {max_grad_norm}")
         print(f"average gradient norm = {average_grad_norm}")
+        print(f"training loss = {training_loss}")
+        print(f"validation loss = {validation_loss}")
+        print(f"training sequence-wise accuracy = {training_sequence_wise_accuracy}")
+        print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
         print(f"best epoch = {best_epoch}")
         print(f"best validation sequence-wise accuracy = {best_validation_sequence_wise_accuracy}")
         print()
