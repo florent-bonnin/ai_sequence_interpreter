@@ -26,17 +26,24 @@ print(f"{device}")
 print()
 
 # GETTING INFO
-train_path = f"{DATASET_PATH}/train"
-train_files = sorted([str(path) for path in Path(train_path).iterdir()])
-nb_curriculum_steps = len(train_files)
-dataset = SequenceInterpreterDataset(train_files[0])
+validation_path = f"{DATASET_PATH}/val"
+validation_files = sorted([str(path) for path in Path(validation_path).iterdir()])
+dataset = SequenceInterpreterDataset(validation_files[0])
 input_tensor, target_tensor = dataset[0]
-nb_cells = target_tensor.shape[1]
-with open(train_files[0], "r", encoding="utf-8") as file:
-    include_intermediate_steps = ":" in file.read()
+NB_CELLS = target_tensor.shape[1]
+NB_CURRICULUM_STEPS = len(validation_files)
+with open(validation_files[0], "r", encoding="utf-8") as file:
+    text = file.read()
+    symbols = set(text) - {",", ":", "\n"}
+    NB_SYMBOLS = len(symbols)
+    INCLUDE_INTERMEDIATE_STEPS = ":" in text
+print(f"NB_CELLS = {NB_CELLS}")
+print(f"NB_CURRICULUM_STEPS = {NB_CURRICULUM_STEPS}")
+print(f"NB_SYMBOLS = {NB_SYMBOLS}")
+print(f"INCLUDE_INTERMEDIATE_STEPS = {INCLUDE_INTERMEDIATE_STEPS}")
 
 # MODEL CREATION
-sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, nb_cells, include_intermediate_steps)
+sequence_interpreter = SequenceInterpreter(RNN_TYPE, RNN_STATE_LENGTH, NB_RNN_LAYERS, BIDIRECTIONAL, NB_CELLS, INCLUDE_INTERMEDIATE_STEPS, NB_SYMBOLS)
 print(f"{sequence_interpreter}")
 print()
 sequence_interpreter.to(device)
@@ -46,9 +53,9 @@ optimizer = torch.optim.AdamW(sequence_interpreter.parameters(), lr=INITIAL_LEAR
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=10)
 
 # CURRICULUM
-for i in range(nb_curriculum_steps):
+for i in range(NB_CURRICULUM_STEPS):
 
-    nb_digits = len(str(nb_curriculum_steps))
+    nb_digits = len(str(NB_CURRICULUM_STEPS))
     train_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/train/{i + 1:0{nb_digits}d}.csv")
     val_dataset = SequenceInterpreterDataset(f"{DATASET_PATH}/val/{i + 1:0{nb_digits}d}.csv")
 

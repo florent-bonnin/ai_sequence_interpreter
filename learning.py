@@ -18,9 +18,9 @@ class SequenceInterpreterDataset(Dataset):
                 intermediate_steps = target_str.split(":")
                 input_list = [int(char) for char in input_str]
                 target_list = [[int(char) for char in intermediate_step] for intermediate_step in intermediate_steps]
-                input_tensor = torch.tensor(input_list).float()
-                target_tensor = torch.tensor(target_list).float()
-                input_tensor = input_tensor.unsqueeze(1) / 3
+                input_tensor = torch.tensor(input_list)
+                target_tensor = torch.tensor(target_list)
+                target_tensor = target_tensor.float()
                 example = (input_tensor, target_tensor)
                 self.examples.append(example)
 
@@ -38,11 +38,12 @@ def collate_fn(batch):
 
 class SequenceInterpreter(nn.Module):
 
-    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells, include_intermediate_steps):
+    def __init__(self, rnn_type, rnn_state_length, nb_rnn_layers, bidirectional, nb_cells, include_intermediate_steps, nb_symbols):
         super().__init__()
         self.rnn_type = rnn_type
         self.nb_cells = nb_cells
         self.include_intermediate_steps = include_intermediate_steps
+        self.nb_symbols = nb_symbols
         if rnn_type == "GRU":
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
@@ -51,7 +52,9 @@ class SequenceInterpreter(nn.Module):
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):
-        lengths = (x.squeeze(2) != -1).sum(dim=1).cpu()
+        lengths = (x != -1).sum(dim=1).cpu()
+        x = nn.functional.one_hot(x, self.nb_symbols)
+        x = x.float()
         x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
         if self.include_intermediate_steps:
