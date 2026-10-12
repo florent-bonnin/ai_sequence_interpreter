@@ -1,2 +1,3 @@
 - one-hot encoding
 - 8 instructions
+- donner un nouveau sens à la validation : pas de curriculum, un seul fichier avec des séquences plus longues que pendant l'entraînement
