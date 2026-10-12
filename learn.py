@@ -13,6 +13,7 @@ BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.0005
+MAX_GRADIENT_NORM = 1
 NB_EPOCHS = 1000
 NB_RNN_LAYERS = 1
 RESET_LEARNING_RATE = False
@@ -73,7 +74,7 @@ for i in range(NB_CURRICULUM_STEPS):
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")
         print(f"learning rate = {optimizer.param_groups[0]["lr"]}")
-        training_loss, training_cell_wise_accuracy, training_sequence_wise_accuracy, max_grad_norm, average_grad_norm = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
+        training_loss, training_cell_wise_accuracy, training_sequence_wise_accuracy, max_grad_norm, average_grad_norm = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device, MAX_GRADIENT_NORM)
         validation_loss, validation_cell_wise_accuracy, validation_sequence_wise_accuracy = evaluate_the_model(val_dataloader, sequence_interpreter, loss_function, device)
         scheduler.step(validation_loss)
         if validation_sequence_wise_accuracy > best_validation_sequence_wise_accuracy:

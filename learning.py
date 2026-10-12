@@ -90,7 +90,7 @@ def get_nb_correct_sequences_in_batch(targets, outputs):
 def get_nb_sequences_in_dataset(dataloader):
     return len(dataloader) * dataloader.batch_size
 
-def train_the_model(dataloader, model, loss_function, optimizer, device):
+def train_the_model(dataloader, model, loss_function, optimizer, device, max_gradient_norm):
     print("training")
     model.train()
     total_loss = 0
@@ -106,7 +106,9 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
         mask = targets != -1
         loss = loss_function(outputs[mask], targets[mask])
         loss.backward()
-        grad_norm = nn.utils.clip_grad_norm_(model.parameters(), max_norm=float("inf"))
+        if max_gradient_norm is None:
+            max_gradient_norm = float("inf")
+        grad_norm = nn.utils.clip_grad_norm_(model.parameters(), max_norm=max_gradient_norm)
         if grad_norm > max_grad_norm:
             max_grad_norm = grad_norm
         total_grad_norm += grad_norm
