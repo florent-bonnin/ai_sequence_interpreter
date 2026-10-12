@@ -96,6 +96,8 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
     total_loss = 0
     nb_correct_cells = 0
     nb_correct_sequences = 0
+    max_grad_norm = 0
+    total_grad_norm = 0
     for i, (inputs, targets) in enumerate(dataloader):
         inputs = inputs.to(device)
         targets = targets.to(device)
@@ -104,6 +106,10 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
         mask = targets != -1
         loss = loss_function(outputs[mask], targets[mask])
         loss.backward()
+        grad_norm = nn.utils.clip_grad_norm_(model.parameters(), max_norm=float("inf"))
+        if grad_norm > max_grad_norm:
+            max_grad_norm = grad_norm
+        total_grad_norm += grad_norm
         optimizer.step()
         total_loss += loss.item()
         nb_correct_cells += get_nb_correct_cells_in_batch(targets, outputs)
@@ -113,8 +119,9 @@ def train_the_model(dataloader, model, loss_function, optimizer, device):
     average_loss = total_loss / len(dataloader)
     cell_wise_accuracy = nb_correct_cells / get_nb_cells_in_dataset(dataloader)
     sequence_wise_accuracy = nb_correct_sequences / get_nb_sequences_in_dataset(dataloader)
+    average_grad_norm = total_grad_norm / len(dataloader)
     print()
-    return average_loss, cell_wise_accuracy, sequence_wise_accuracy
+    return average_loss, cell_wise_accuracy, sequence_wise_accuracy, max_grad_norm, average_grad_norm
 
 def evaluate_the_model(dataloader, model, loss_function, device):
     print("evaluating")

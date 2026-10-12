@@ -73,7 +73,7 @@ for i in range(NB_CURRICULUM_STEPS):
     for j in range(NB_EPOCHS):
         print(f"curriculum step {i + 1} - epoch {j + 1}")
         print(f"learning rate = {optimizer.param_groups[0]["lr"]}")
-        training_loss, training_cell_wise_accuracy, training_sequence_wise_accuracy = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
+        training_loss, training_cell_wise_accuracy, training_sequence_wise_accuracy, max_grad_norm, average_grad_norm = train_the_model(train_dataloader, sequence_interpreter, loss_function, optimizer, device)
         validation_loss, validation_cell_wise_accuracy, validation_sequence_wise_accuracy = evaluate_the_model(val_dataloader, sequence_interpreter, loss_function, device)
         scheduler.step(validation_loss)
         if validation_sequence_wise_accuracy > best_validation_sequence_wise_accuracy:
@@ -85,6 +85,8 @@ for i in range(NB_CURRICULUM_STEPS):
         print(f"validation cell-wise accuracy = {validation_cell_wise_accuracy}")
         print(f"training sequence-wise accuracy = {training_sequence_wise_accuracy}")
         print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
+        print(f"maximum gradient norm = {max_grad_norm}")
+        print(f"average gradient norm = {average_grad_norm}")
         print(f"best epoch = {best_epoch}")
         print(f"best validation sequence-wise accuracy = {best_validation_sequence_wise_accuracy}")
         print()
