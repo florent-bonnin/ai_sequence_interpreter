@@ -21,13 +21,6 @@ def generate_instructions(nbs_instructions, instructions_subset):
         instructions.append(instruction)
     return instructions
 
-def keep_in_space(nb_cells, position):
-    if position == -1:
-        position = nb_cells - 1
-    elif position == nb_cells:
-        position = 0
-    return position
-
 def generate_curriculum_steps(instructions_generation_type, nbs_instructions):
     curriculum_steps = []
     if instructions_generation_type == "constant":
