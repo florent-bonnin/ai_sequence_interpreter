@@ -1,16 +1,16 @@
 from dataset_generation import generate_dataset
 
-path = "datasets/dev"
-parts = (
+PATH = "datasets/dev"
+PARTS = (
     ("train", 80000),
     ("val", 10000),
     ("test", 10000)
 )
-nb_cells = 10
-initialization_type = "zero"
-write_initialization = True
-moves_type = "curriculum"
-nbs_moves = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-include_intermediate_steps = True
+NB_CELLS = 10
+INITIALIZATION_TYPE = "variable"
+WRITE_INITIALIZATION = True
+INSTRUCTIONS_GENERATION_TYPE = "curriculum"
+NBS_INSTRUCTIONS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+INCLUDE_INTERMEDIATE_STEPS = True
 
-generate_dataset(path, parts, nb_cells, initialization_type, write_initialization, moves_type, nbs_moves, include_intermediate_steps)
+generate_dataset(PATH, PARTS, NB_CELLS, INITIALIZATION_TYPE, WRITE_INITIALIZATION, INSTRUCTIONS_GENERATION_TYPE, NBS_INSTRUCTIONS, INCLUDE_INTERMEDIATE_STEPS)
