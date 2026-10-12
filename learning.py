@@ -48,12 +48,12 @@ class SequenceInterpreter(nn.Module):
             rnn_class = nn.GRU
         elif rnn_type == "LSTM":
             rnn_class = nn.LSTM
-        self.rnn = rnn_class(1, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
+        self.rnn = rnn_class(nb_symbols, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
         self.linear = nn.Linear(rnn_state_length, nb_cells)
 
     def forward(self, x):
         lengths = (x != -1).sum(dim=1).cpu()
-        x = nn.functional.one_hot(x, self.nb_symbols)
+        x = nn.functional.one_hot(x.clamp(0), self.nb_symbols)
         x = x.float()
         x = pack_padded_sequence(x, lengths, True, False)
         rnn_outputs, state = self.rnn(x)
