@@ -4,6 +4,7 @@ from learning import SequenceInterpreter
 from learning import SequenceInterpreterDataset
 from learning import train_the_model
 from pathlib import Path
+from tabulate import tabulate
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -80,14 +81,10 @@ for i in range(NB_CURRICULUM_STEPS):
         if validation_sequence_wise_accuracy > best_validation_sequence_wise_accuracy:
             best_epoch = j + 1
             best_validation_sequence_wise_accuracy = validation_sequence_wise_accuracy
-        print(f"maximum gradient norm = {max_grad_norm}")
-        print(f"average gradient norm = {average_grad_norm}")
-        print(f"training loss = {training_loss}")
-        print(f"validation loss = {validation_loss}")
-        print(f"training sequence-wise accuracy = {training_sequence_wise_accuracy}")
-        print(f"validation sequence-wise accuracy = {validation_sequence_wise_accuracy}")
-        print(f"best epoch = {best_epoch}")
-        print(f"best validation sequence-wise accuracy = {best_validation_sequence_wise_accuracy}")
+        tabular_data = [[average_grad_norm, best_epoch, best_validation_sequence_wise_accuracy, max_grad_norm, training_loss, training_sequence_wise_accuracy, validation_loss, validation_sequence_wise_accuracy]]
+        headers = ["average gradient norm", "best epoch", "best validation sequence-wise accuracy", "maximum gradient norm", "training loss", "training sequence-wise accuracy", "validation loss", "validation sequence-wise accuracy"]
+        tablefmt = "rounded_grid"
+        print(tabulate(tabular_data, headers, tablefmt))
         print()
         if validation_sequence_wise_accuracy >= ACCURACY_TARGET:
             success = True
