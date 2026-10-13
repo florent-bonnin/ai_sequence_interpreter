@@ -48,7 +48,10 @@ class SequenceInterpreter(nn.Module):
         elif rnn_type == "LSTM":
             rnn_class = nn.LSTM
         self.rnn = rnn_class(10, rnn_state_length, nb_rnn_layers, batch_first=True, bidirectional=bidirectional)
-        self.linear = nn.Linear(rnn_state_length, nb_cells)
+        in_features = rnn_state_length
+        if bidirectional:
+            in_features *= 2
+        self.linear = nn.Linear(in_features, nb_cells)
 
     def forward(self, x):
         lengths = (x != -1).sum(dim=1).cpu()

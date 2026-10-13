@@ -8,13 +8,13 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-ACCURACY_TARGET = 0.98
+ACCURACY_TARGET = 0.99
 BATCH_SIZE = 64
 BIDIRECTIONAL = False
 DATASET_PATH = "datasets/dev"
 INITIAL_LEARNING_RATE = 0.0005
 MAX_GRADIENT_NORM = 1
-NB_EPOCHS = 1000
+NB_EPOCHS = 100
 NB_RNN_LAYERS = 1
 RESET_LEARNING_RATE = False
 RESET_SCHEDULER = True
