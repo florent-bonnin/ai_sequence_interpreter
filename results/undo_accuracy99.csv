@@ -1,4 +1,5 @@
 architecture,maximum number of instructions
+1 bidirectional GRU,20
 1 GRU,50
 2 GRU,120
 3 GRU,?
