@@ -3,3 +3,4 @@ architecture,maximum number of instructions
 1 GRU,50
 3 GRU,80
 2 GRU,120
+1 LSTM,160
