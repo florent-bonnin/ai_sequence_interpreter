@@ -3,5 +3,6 @@ architecture,maximum number of instructions
 1 GRU,50
 3 GRU,80
 2 GRU,120
+1 bidirectional LSTM,140
 1 LSTM,160
 2 LSTM,>= 210
