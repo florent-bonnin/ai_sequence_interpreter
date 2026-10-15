@@ -1,1 +1,0 @@
-- donner un nouveau sens au dataset / à la phase "test" : pas de curriculum, un seul fichier avec des séquences plus longues que pendant l'entraînement
